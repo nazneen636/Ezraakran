@@ -13,8 +13,8 @@ export default function Home() {
 
       {/* Chat Area should take full width on small screens, and adjust accordingly on larger screens */}
       <div className="flex-1 w-full">
-        <SingleChat />
-        {/* <ChatArea /> */}
+        {/* <SingleChat/> */}
+        <ChatArea />
       </div>
 
       {/* Optional: Add SingleChat component visibility if necessary */}
