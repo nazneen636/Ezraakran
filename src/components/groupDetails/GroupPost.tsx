@@ -156,7 +156,7 @@ const GroupPost: React.FC<GroupPostProps> = () => {
                     {post.images.map((img: string, index: number) => (
                       <div
                         key={index}
-                        className={`w-full rounded-2xl overflow-hidden bg-slate-300 ${
+                        className={`w-full rounded-2xl overflow-hidden bg-[#00000037] ${
                           post.images.length === 1
                             ? "h-[200px] md:h-[500px]" // Full width, bigger height for single image
                             : "h-[200px] md:h-[400px]" // Normal height for multiple images
