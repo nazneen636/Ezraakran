@@ -39,7 +39,14 @@ const CreateShopPost = () => {
   const [createStripeAccount] = useCreateStripeAccountMutation(); // Hook for Stripe Account creation
   const [createStripeAccountLinks] = useCreateStripeAccountLinksMutation(); // Hook for creating Stripe account link
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    price: number;
+    category: string;
+    images: string[];
+    postType: string;
+  }>({
     title: "",
     description: "",
     price: 0,
@@ -48,7 +55,7 @@ const CreateShopPost = () => {
     postType: "SALE",
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -56,13 +63,7 @@ const CreateShopPost = () => {
     }));
   };
 
-  const handleImageChange = (index, file) => {
-    const updatedImages = [...formData.images];
-    updatedImages[index] = file;
-    setFormData({ ...formData, images: updatedImages });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
     try {
@@ -73,18 +74,32 @@ const CreateShopPost = () => {
         price = 0;
       }
       const updatedData = {
-        title: formData.title,
+        title: formData?.title,
         description: formData.description,
         price: price, // Ensure it's a number here
         category: formData.category,
         postType: formData.postType,
-        images: formData.images,
       };
 
-      console.log(updatedData, "updatedData"); // Debugging
+      const newFormData = new FormData();
+
+      newFormData.append("data", JSON.stringify(updatedData));
+
+      // Check if formData.images exists and is iterable
+      if (formData && formData?.images && formData?.images.length > 0) {
+        // Convert FileList to an array (if it's not already an array)
+        const imagesArray = Array.from(formData.images); // Converts FileList to an array
+
+        console.log(`aee imagess array`, imagesArray);
+
+        // Now you can safely use map
+        imagesArray.forEach((img) => {
+          newFormData?.append("images", img);
+        });
+      }
 
       // Call the API request **once**, not in a loop
-      const response = await createShopPost(updatedData).unwrap();
+      const response = await createShopPost(newFormData).unwrap();
 
       if (response.success) {
         setIsModalOpen(false);
@@ -205,12 +220,14 @@ const CreateShopPost = () => {
                 accept="image/*"
                 onChange={(e) => {
                   const files = e.target.files;
-                  if (files) {
+                  console.log(`see files`, files);
+                  if (files?.length! > 0) {
                     // Convert FileList to an array and update the state
-                    const fileArray = Array.from(files);
+                    // const fileArray = Array.from(files);
+                    // @ts-expect-error error
                     setFormData((prev) => ({
                       ...prev,
-                      images: fileArray, // Make sure the images state is updated with the files
+                      images: files,
                     }));
                   }
                 }}

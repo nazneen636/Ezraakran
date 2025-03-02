@@ -95,6 +95,7 @@ export const baseApi = createApi({
         url: "/post/create-post",
         method: "POST",
         body: data,
+        contentType: "multipart/form-data",
       }),
     }),
     // Define the create stripe account mutation
