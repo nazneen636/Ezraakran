@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
@@ -12,7 +12,7 @@ interface ChatMessage {
 }
 
 // Initialize the Socket.IO client
-const socket = io("http://localhost:5000"); // Replace with your server URL
+const socket = io("http://10.0.10.39:5001/api/v1"); // Replace with your server URL
 
 const SingleChat = () => {
   const [userId, setUserId] = useState<string>(""); // Your User ID
@@ -22,25 +22,36 @@ const SingleChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]); // List of Messages
 
   useEffect(() => {
+    console.log("useEffect triggered", { userId, otherUserId });
+
     if (userId && otherUserId) {
       const room = [userId, otherUserId].sort().join("-"); // Generate unique room ID
       setRoomId(room);
+      console.log(`Generated Room ID: ${room}`);
+
       socket.emit("joinSingleChat", { userId, otherUserId });
-      console.log(`Joined room: ${room}`);
+      console.log(`Emitted joinSingleChat for room: ${room}`);
     }
 
-    // Listen for messages
+    // Listen for incoming messages
     socket.on("receiveMessage", (chatMessage: ChatMessage) => {
+      console.log("Received message:", chatMessage);
       setMessages((prevMessages) => [...prevMessages, chatMessage]);
     });
 
     return () => {
+      console.log("Component unmounting, disconnecting socket...");
       socket.disconnect();
     };
   }, [userId, otherUserId]);
 
   const sendMessage = () => {
     if (message.trim()) {
+      console.log("Sending message:", {
+        senderId: userId,
+        receiverId: otherUserId,
+        message,
+      });
       socket.emit("sendMessage", {
         senderId: userId,
         receiverId: otherUserId,
@@ -48,12 +59,15 @@ const SingleChat = () => {
       });
 
       // Optimistic UI update
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { senderId: userId, message, createdAt: new Date().toISOString() },
-      ]);
+      const newMessage = {
+        senderId: userId,
+        message,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      console.log("Updated messages state:", [...messages, newMessage]);
 
-      setMessage(""); 
+      setMessage("");
     }
   };
 
@@ -68,7 +82,10 @@ const SingleChat = () => {
           <input
             type="text"
             value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+            onChange={(e) => {
+              setUserId(e.target.value);
+              console.log("User ID set to:", e.target.value);
+            }}
           />
         </label>
       </div>
@@ -80,13 +97,24 @@ const SingleChat = () => {
           <input
             type="text"
             value={otherUserId}
-            onChange={(e) => setOtherUserId(e.target.value)}
+            onChange={(e) => {
+              setOtherUserId(e.target.value);
+              console.log("Other User ID set to:", e.target.value);
+            }}
           />
         </label>
       </div>
 
       {/* Messages */}
-      <div style={{ marginTop: "20px", height: "200px", overflowY: "auto" }}>
+      <div
+        style={{
+          marginTop: "20px",
+          height: "200px",
+          overflowY: "auto",
+          border: "1px solid #ccc",
+          padding: "10px",
+        }}
+      >
         <ul>
           {messages.map((msg, index) => (
             <li key={index} style={{ margin: "5px 0" }}>
@@ -102,7 +130,10 @@ const SingleChat = () => {
           type="text"
           value={message}
           placeholder="Type a message"
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            console.log("Message input changed:", e.target.value);
+          }}
         />
         <button onClick={sendMessage}>Send</button>
       </div>
