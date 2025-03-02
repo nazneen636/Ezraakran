@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --clash-display: "Clash Display", sans-serif;
+    --radius: 0.5rem;
+  }
+}
+body {
+  font-family: var(--clash-display);
+}
