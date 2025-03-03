@@ -15,6 +15,7 @@ import {
   useGetPostsQuery,
 } from "@/redux/api/baseApi";
 import CreateShopPost from "@/components/shop/CreateShopPost";
+import Loading from "@/components/Loading";
 
 interface Product {
   id: number;
@@ -52,7 +53,7 @@ const page = () => {
       setCurrentPage(page);
     }
   };
-
+  if (isLoading) <Loading />;
   return (
     <div className="sm:mx-auto py-10 space-y-8 sm:w-full md:px-12 px-2 mb-10 sm:container">
       <h1 className="text-4xl md:text-6xl font-semibold">Community Store</h1>

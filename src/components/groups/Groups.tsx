@@ -84,7 +84,7 @@ export default function Groups() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
       )}
       <div className="sm:mx-auto py-10 space-y-2 md:space-y-4 sm:w-full md:pl-12 px-4 mb-10 sm:container">
-        <h1 className="text-4xl md:text-6xl lg:text-9xl font-bold tracking-tight">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
           Groups
         </h1>
 
@@ -148,8 +148,12 @@ export default function Groups() {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem className="md:text-base text-sm" value="most">Most Members</SelectItem>
-                  <SelectItem className="md:text-base text-sm" value="newest">Newest Registered</SelectItem>
+                  <SelectItem className="md:text-base text-sm" value="most">
+                    Most Members
+                  </SelectItem>
+                  <SelectItem className="md:text-base text-sm" value="newest">
+                    Newest Registered
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

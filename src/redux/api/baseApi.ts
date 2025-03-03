@@ -114,6 +114,10 @@ export const baseApi = createApi({
         body: data,
       }),
     }),
+    // get all user
+    getAllUsers:builder.query({
+      query: ()=>`/users`
+    }),
     // Define the get user by ID query
     getUserById: builder.query({
       query: (userId) => `/users/${userId}`, // Using the user ID in the URL
@@ -259,6 +263,7 @@ export const {
   useCreatePaymentIntentMutation,
   useGetPostsQuery,
   useCreateBuyProductsMutation,
+  useGetAllUsersQuery,
   useGetUserByIdQuery,
   useUpdateUserProfileMutation,
   useCreateShopPostMutation,

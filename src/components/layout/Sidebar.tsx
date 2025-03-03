@@ -79,7 +79,7 @@ export function Sidebar({ className }: SidebarProps) {
               alt="logo"
               width={200}
               height={300}
-              className="h-full w-full object-cover hidden md:block ml-[-25px]"
+              className="h-full w-full object-cover block ml-[-25px]"
             />
           </h2>
         )}

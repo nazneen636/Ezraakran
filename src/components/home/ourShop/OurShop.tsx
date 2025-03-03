@@ -44,7 +44,7 @@ export default function OurShopCarousel() {
   };
   if (isLoading) return <Loading />;
   return (
-    <section className="sm:w-full">
+    <section className="sm:w-full px-2 md:px-0">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl md:text-6xl font-bold tracking-tight">
           Our Shop
@@ -76,6 +76,14 @@ export default function OurShopCarousel() {
           ))}
         </div>
       </Link>
+      <div className="mt-6 text-center">
+        <Link
+          href="/groups"
+          className="font-bold text-white hover:text-lime-800 duration-300 transition-all hover:underline"
+        >
+          View All Products →
+        </Link>
+      </div>
     </section>
   );
 }

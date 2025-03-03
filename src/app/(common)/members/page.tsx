@@ -1,14 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import avatar1 from "@/assets/members/member1.png";
-import avatar2 from "@/assets/members/member2.png";
-import avatar3 from "@/assets/members/member3.png";
-import avatar4 from "@/assets/members/member4.png";
-import avatar5 from "@/assets/members/member1.png";
-
 import MemberCard from "@/components/members/member-card";
 import { Pagination } from "@/components/members/pagination";
 import {
@@ -18,6 +12,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { useGetAllUsersQuery } from "@/redux/api/baseApi";
 
 interface Member {
   id: string;
@@ -27,98 +22,64 @@ interface Member {
   joinedDate: string;
   avatar: any;
   status: "online" | "offline";
+  createdAt: string;
 }
 
-const members: Member[] = [
-  {
-    id: "1",
-    name: "Tyrone Stewart",
-    username: "@Tyrone-clark",
-    role: "3D ARTIST",
-    joinedDate: "April 2019",
-    avatar: avatar1,
-    status: "online",
-  },
-  {
-    id: "2",
-    name: "Ezra",
-    username: "@ezra_ui",
-    role: "UX/UI DESIGNER",
-    joinedDate: "Oct 2020",
-    avatar: avatar2,
-    status: "offline",
-  },
-  // {
-  //   id: "3",
-  //   name: "Lilly-Rose Holland",
-  //   username: "@lillyrose.flower",
-  //   role: "ILLUSTRATOR",
-  //   joinedDate: "Jan 2015",
-  //   avatar: avatar3,
-  //   status: "online",
-  // },
-  // {
-  //   id: "4",
-  //   name: "Valerie Ferguson",
-  //   username: "@valerie_ui",
-  //   role: "UX/UI DESIGNER",
-  //   joinedDate: "Oct 2020",
-  //   avatar: avatar4,
-  //   status: "offline",
-  // },
-  // {
-  //   id: "5",
-  //   name: "Lilly-Rose Holland",
-  //   username: "@lillyrose.flower",
-  //   role: "ILLUSTRATOR",
-  //   joinedDate: "Jan 2015",
-  //   avatar: avatar5,
-  //   status: "online",
-  // },
-  // {
-  //   id: "6",
-  //   name: "Valerie Ferguson",
-  //   username: "@valerie_ui",
-  //   role: "UX/UI DESIGNER",
-  //   joinedDate: "Oct 2020",
-  //   avatar: avatar1,
-  //   status: "offline",
-  // },
-  // {
-  //   id: "7",
-  //   name: "Lilly-Rose Holland",
-  //   username: "@lillyrose.flower",
-  //   role: "ILLUSTRATOR",
-  //   joinedDate: "Jan 2015",
-  //   avatar: avatar2,
-  //   status: "online",
-  // },
-  // {
-  //   id: "8",
-  //   name: "Valerie Ferguson",
-  //   username: "@valerie_ui",
-  //   role: "UX/UI DESIGNER",
-  //   joinedDate: "Oct 2020",
-  //   avatar: avatar3,
-  //   status: "offline",
-  // },
-  // {
-  //   id: "9",
-  //   name: "Lilly-Rose Holland",
-  //   username: "@lillyrose.flower",
-  //   role: "ILLUSTRATOR",
-  //   joinedDate: "Jan 2015",
-  //   avatar: avatar4,
-  //   status: "online",
-  // },
-];
-
 export default function Members() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const { data: allUsers } = useGetAllUsersQuery({});
+  console.log(allUsers?.data, "all users");
 
-  const totalPages = Math.ceil(members.length / itemsPerPage);
-  const currentMembers = members.slice(
+  // Format the date
+  const formattedDate = (createdAt: string) => {
+    const joinedDate = new Date(createdAt);
+    return joinedDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [sortOption, setSortOption] = useState("newest"); // State for sorting option
+  const itemsPerPage = 9; // Set items per page to 10
+
+  // Filter the users based on the search query
+  const filteredUsers = allUsers?.data.filter((member: any) => {
+    const fullName = `${member.firstName} ${member.lastName}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
+
+  // Sorting logic based on the selected option
+  const sortUsers = (users: any[], option: string) => {
+    switch (option) {
+      case "newest":
+        return users.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      case "oldest":
+        return users.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case "az":
+        return users.sort((a, b) => {
+          const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+          const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+      default:
+        return users;
+    }
+  };
+
+  // Sort the filtered users based on the selected sorting option
+  const sortedUsers = sortUsers(filteredUsers || [], sortOption);
+
+  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
+
+  // Slice the sorted users for the current page
+  const currentMembers = sortedUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -140,7 +101,7 @@ export default function Members() {
           <div className="flex items-center text-sm sm:text-base font-bold text-red cursor-pointer">
             All Members{" "}
             <span className="ml-2 text-xs bg-red px-2 text-white rounded">
-              {members.length}
+              {filteredUsers?.length}
             </span>
           </div>
           <div className="flex items-center text-sm sm:text-base font-bold text-red cursor-pointer">
@@ -163,11 +124,13 @@ export default function Members() {
                 rounded-md bg-white transition-all duration-300 ease-in-out focus:outline-none 
                 focus:ring-1 focus:ring-gray-200 placeholder:opacity-0 
                 group-hover:placeholder:opacity-100 group-hover:border-gray-200"
+              value={searchQuery} // Bind the search query to the input field
+              onChange={(e) => setSearchQuery(e.target.value)} // Update search query
             />
           </div>
 
           {/* Sort Select */}
-          <Select defaultValue="newest">
+          <Select defaultValue="newest" onValueChange={setSortOption}>
             <SelectTrigger
               className="md:w-[200px] md:text-base text-sm rounded-md  px-3 py-2 h-10 
                 focus:ring-1 focus:ring-gray-200 focus:ring-offset-0 bg-white text-black"
@@ -191,15 +154,22 @@ export default function Members() {
 
       {/* Members Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-        {currentMembers.map((member) => (
-          <MemberCard key={member.id} member={member} />
+        {currentMembers?.map((member: any) => (
+          <MemberCard
+            key={member.id}
+            firstName={member.firstName}
+            lastName={member.lastName}
+            role={member.role}
+            profilePicture={member.profilePicture}
+            joinedDate={`${formattedDate(member.createdAt)}`}
+          />
         ))}
       </div>
 
       {/* Pagination */}
       <Pagination
         currentPage={currentPage}
-        totalItems={members.length}
+        totalItems={sortedUsers.length}
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
       />
